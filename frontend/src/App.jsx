@@ -25,9 +25,13 @@ function AppContent() {
     }
   }, [])
 
-  const handleGameCreated = () => {
+  const handleGameCreated = (gameId) => {
     setShowCreateGame(false)
-    setRefreshTrigger(prev => prev + 1)
+    if (gameId) {
+      setSelectedGameId(gameId)
+    } else {
+      setRefreshTrigger(prev => prev + 1)
+    }
   }
 
   const handleGameSelected = (gameId) => {
@@ -70,7 +74,7 @@ function AppContent() {
           <div className="footer-links">
             <a href="https://base.org" target="_blank" rel="noopener noreferrer">About Base</a>
             <span>•</span>
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://github.com/louischidebe" target="_blank" rel="noopener noreferrer">GitHub</a>
           </div>
         </div>
       </footer>

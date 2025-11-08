@@ -52,18 +52,38 @@ function GameList({ onGameSelect, onCreateGame, refreshTrigger }) {
 
   const isMyGame = (game) => {
     if (!address) return false
+    const zeroAddress = '0x0000000000000000000000000000000000000000'
     return game.white?.toLowerCase() === address.toLowerCase() || 
-           game.black?.toLowerCase() === address.toLowerCase()
+           (game.black?.toLowerCase() === address.toLowerCase() && game.black !== zeroAddress)
   }
 
   const getGameStatus = (game) => {
+    const zeroAddress = '0x0000000000000000000000000000000000000000'
     if (!game.active) {
-      if (game.winner && game.winner !== '0x0000000000000000000000000000000000000000') {
+      if (game.winner && game.winner !== zeroAddress) {
         return `Won by ${game.winner.slice(0, 8)}...`
       }
       return 'Ended'
     }
+    if (game.black === zeroAddress) {
+      return 'Waiting for opponent'
+    }
     return game.turn === 0 ? "White's turn" : "Black's turn"
+  }
+
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(Number(timestamp) * 1000)
+    const now = new Date()
+    const diffMs = now - date
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+    
+    if (diffMins < 1) return 'Just now'
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    if (diffDays < 7) return `${diffDays}d ago`
+    return date.toLocaleDateString()
   }
 
   const myGames = games.filter(isMyGame)
@@ -148,8 +168,29 @@ function GameList({ onGameSelect, onCreateGame, refreshTrigger }) {
 }
 
 function GameCard({ game, isMyGame, currentAddress, onSelect, getGameStatus }) {
-  const formatAddress = (addr) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
+  const formatAddress = (addr) => {
+    const zeroAddress = '0x0000000000000000000000000000000000000000'
+    if (addr === zeroAddress) return 'Waiting...'
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`
+  }
   const isWhite = game.white?.toLowerCase() === currentAddress?.toLowerCase()
+  const zeroAddress = '0x0000000000000000000000000000000000000000'
+  const needsOpponent = game.black === zeroAddress
+  
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(Number(timestamp) * 1000)
+    const now = new Date()
+    const diffMs = now - date
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+    
+    if (diffMins < 1) return 'Just now'
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    if (diffDays < 7) return `${diffDays}d ago`
+    return date.toLocaleDateString()
+  }
 
   return (
     <div 
@@ -157,7 +198,12 @@ function GameCard({ game, isMyGame, currentAddress, onSelect, getGameStatus }) {
       onClick={onSelect}
     >
       <div className="game-card-header">
-        <div className="game-id">Game #{game.id}</div>
+        <div className="game-id">
+          Game #{game.id}
+          <span style={{marginLeft: '8px', fontSize: '0.85em', opacity: 0.7}}>
+            {formatTimestamp(game.createdAt)}
+          </span>
+        </div>
         <div className={`game-status ${game.active ? 'active' : 'ended'}`}>
           {getGameStatus(game)}
         </div>
@@ -175,13 +221,13 @@ function GameCard({ game, isMyGame, currentAddress, onSelect, getGameStatus }) {
 
         <div className="vs">VS</div>
 
-        <div className={`player ${!isWhite && isMyGame ? 'you' : ''}`}>
+        <div className={`player ${!isWhite && isMyGame ? 'you' : ''} ${needsOpponent ? 'waiting' : ''}`}>
           <span className="piece">♚</span>
           <div>
             <div className="player-color">Black</div>
             <div className="player-addr">{formatAddress(game.black)}</div>
           </div>
-          {!isWhite && isMyGame && <span className="you-badge">You</span>}
+          {!isWhite && isMyGame && !needsOpponent && <span className="you-badge">You</span>}
         </div>
       </div>
 

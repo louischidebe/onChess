@@ -10,6 +10,7 @@ function CreateGame({ onGameCreated, onCancel, initialJoinGameId }) {
   const [challengeFid, setChallengeFid] = useState('')
   const [statusMessage, setStatusMessage] = useState('')
   const [sendNotification, setSendNotification] = useState(false)
+  const [joinedGameId, setJoinedGameId] = useState(null)
   const { address } = useAccount()
   const { data: hash, writeContract, isPending } = useWriteContract()
   const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash })
@@ -89,6 +90,13 @@ function CreateGame({ onGameCreated, onCancel, initialJoinGameId }) {
     }
   }, [hash, isConfirming, isPending, publicClient, sendNotification, challengeFid])
 
+  // Navigate to game when join is successful
+  useEffect(() => {
+    if (joinedGameId !== null) {
+      onGameCreated(joinedGameId)
+    }
+  }, [joinedGameId, onGameCreated])
+
   const handleJoinByCode = async () => {
     if (!joinCode) {
       alert('Please enter a join code')
@@ -101,18 +109,52 @@ function CreateGame({ onGameCreated, onCancel, initialJoinGameId }) {
       alert('Invalid join code')
       return
     }
+    
+    // Verify game exists and needs a player
     try {
-      await writeContract({
+      const game = await publicClient.readContract({
+        address: contractAddressData.address,
+        abi: CONTRACT_ABI,
+        functionName: 'getGame',
+        args: [BigInt(gameId)]
+      })
+      
+      const zeroAddress = '0x0000000000000000000000000000000000000000'
+      if (game.black !== zeroAddress) {
+        alert('This game already has both players')
+        return
+      }
+      
+      if (!game.active) {
+        alert('This game is no longer active')
+        return
+      }
+    } catch (e) {
+      alert('Game not found or invalid code')
+      return
+    }
+    
+    try {
+      writeContract({
         address: contractAddressData.address,
         abi: CONTRACT_ABI,
         functionName: 'joinGame',
         args: [BigInt(gameId)]
       })
-      setStatusMessage(`Joined game #${gameId}`)
-      onGameCreated?.()
+      // Will navigate after transaction confirms
+      setJoinedGameId(gameId)
     } catch (error) {
       console.error('Error joining game:', error)
       alert('Failed to join game: ' + error.message)
+    }
+  }
+
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setStatusMessage(`✅ Code ${text} copied to clipboard!`)
+    } catch (err) {
+      console.error('Failed to copy:', err)
     }
   }
 
@@ -130,16 +172,14 @@ function CreateGame({ onGameCreated, onCancel, initialJoinGameId }) {
     if (initialJoinGameId != null) {
       (async () => {
         try {
-          await writeContract({
+          writeContract({
             address: contractAddressData.address,
             abi: CONTRACT_ABI,
             functionName: 'joinGame',
             args: [BigInt(initialJoinGameId)]
           })
-          setStatusMessage(`Joined game #${initialJoinGameId}`)
-          onGameCreated?.()
+          setJoinedGameId(initialJoinGameId)
         } catch (e) {
-          // ignore if already joined
           console.warn('Auto-join failed or already joined:', e?.message)
         }
       })()
@@ -169,8 +209,9 @@ function CreateGame({ onGameCreated, onCancel, initialJoinGameId }) {
               {isPending ? 'Creating...' : isConfirming ? 'Confirming...' : 'Generate Join Code'}
             </button>
             {generatedCode && (
-              <div className="status-message success">
+              <div className="status-message success" onClick={() => copyToClipboard(generatedCode)} style={{cursor: 'pointer'}}>
                 🎲 Join Code: <strong style={{fontSize: '1.2em', letterSpacing: '2px'}}>{generatedCode}</strong>
+                <span style={{marginLeft: '8px', fontSize: '0.9em'}}>📋 Click to copy</span>
               </div>
             )}
             {statusMessage && (

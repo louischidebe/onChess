@@ -33,6 +33,9 @@ contract OnChess is Ownable, ReentrancyGuard {
     uint256 public devFee;
     uint256 public accumulatedFees;
     
+    // Game timeout: 1 hour for pending games
+    uint256 constant PENDING_GAME_TIMEOUT = 1 hours;
+    
     // Starting position FEN
     string constant STARTING_FEN = "startpos";
     
@@ -78,10 +81,34 @@ contract OnChess is Ownable, ReentrancyGuard {
         require(game.black == address(0), "Game already has an opponent");
         require(msg.sender != game.white, "Host cannot join as opponent");
         
+        // Check if game has timed out (inactive for over 1 hour without opponent)
+        if (block.timestamp > game.createdAt + PENDING_GAME_TIMEOUT) {
+            game.active = false;
+            emit GameEnded(gameId, address(0), "timeout - no opponent joined", block.timestamp);
+            revert("Game has timed out");
+        }
+        
         game.black = msg.sender;
+        game.lastMoveAt = block.timestamp;
         
         emit GameJoined(gameId, msg.sender);
     }
+    /**
+     * @notice Close a pending game that has timed out
+     * @param gameId The game ID
+     * @dev Anyone can call this for games pending over 1 hour without opponent
+     */
+    function closePendingGame(uint256 gameId) external {
+        Game storage game = games[gameId];
+        require(game.active, "Game already ended");
+        require(game.black == address(0), "Game already has opponent");
+        require(block.timestamp > game.createdAt + PENDING_GAME_TIMEOUT, "Game has not timed out yet");
+        
+        game.active = false;
+        
+        emit GameEnded(gameId, address(0), "timeout - closed", block.timestamp);
+    }
+    
     /**
      * @notice Make a move in an active game
      * @param gameId The game ID
