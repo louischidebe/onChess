@@ -9,7 +9,7 @@
     "splashBackgroundColor": "#FFFFFF",
     "webhookUrl": "https://onchess-frontend.vercel.app/api/webhook",
     "subtitle": "Every move is onchain!",
-    "description": "OnChess brings chess to Base. Every move is a transaction, every match is verifiable, and every win is immortalized on-chain. Challenge your frens, sign your moves, and own your games.",
+    "description": "OnChess brings chess on-chain. Every move is a transaction, every match verifiable. Challenge frens, sign moves, and own your games.",
     "primaryCategory": "games"
   },
   "accountAssociation": {
