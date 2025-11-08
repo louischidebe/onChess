@@ -29,6 +29,3 @@ dist-ssr
 # OS
 .DS_Store
 Thumbs.db
-
-# Contract artifacts
-contract-address.json
