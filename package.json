@@ -1,0 +1,28 @@
+{
+  "name": "onchess",
+  "version": "1.0.0",
+  "description": "Fully on-chain 1v1 chess miniapp for Farcaster on Base",
+  "private": true,
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "test": "hardhat test",
+    "node": "hardhat node",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:base": "hardhat run scripts/deploy.js --network base",
+    "simulate": "hardhat run scripts/simulate.js --network localhost",
+    "leaderboard": "hardhat run scripts/leaderboard.js --network localhost",
+    "setup:local": "hardhat run scripts/setup-local.js --network localhost"
+  },
+  "workspaces": [
+    "frontend"
+  ],
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.5"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.1",
+    "dotenv": "^17.2.3"
+  }
+}

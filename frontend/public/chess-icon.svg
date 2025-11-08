@@ -1,0 +1,19 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="url(#gradient)"/>
+  
+  <!-- Chess pieces -->
+  <g transform="translate(256, 256)">
+    <!-- King -->
+    <text x="-60" y="20" font-size="120" fill="white" font-family="Arial" text-anchor="middle">♔</text>
+    <!-- Pawn -->
+    <text x="60" y="20" font-size="80" fill="#4285FF" font-family="Arial" text-anchor="middle">♟</text>
+  </g>
+  
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0052FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0041CC;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

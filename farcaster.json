@@ -1,0 +1,20 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjEsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIn0",
+    "payload": "eyJkb21haW4iOiJvbmNoZXNzLmFwcCJ9",
+    "signature": "MHg..."
+  },
+  "frame": {
+    "version": "1",
+    "name": "OnChess",
+    "iconUrl": "https://onchess.app/icon.png",
+    "splashImageUrl": "https://onchess.app/splash.png",
+    "splashBackgroundColor": "#0052FF",
+    "homeUrl": "https://onchess.app",
+    "webhookUrl": "https://onchess.app/api/webhook"
+  },
+  "embed": {
+    "width": 100,
+    "height": 100
+  }
+}
