@@ -1,20 +1,21 @@
 {
-  "accountAssociation": {
-    "header": "eyJmaWQiOjUxNTU4NSwidHlwZSI6ImF1dGgiLCJrZXkiOiIweEQ5YjhmRUNhRTZmOGVFOUVCQzNEMDRiQ0RDREQ1N2YyMzkwODM1NEQifQ",
-    "payload": "eyJkb21haW4iOiJvbmNoZXNzLWZyb250ZW5kLnZlcmNlbC5hcHAifQ",
-    "signature": "huMvVVyq3v2l5ydr+tP4GCUVphD7vugdB0gRQEcBz/10OKkLDcNanb9gU/9ycZTZWxKyz6Av6Nz7/6V4UxbTIBw="
-  },
   "frame": {
     "name": "OnChess",
     "version": "1",
     "iconUrl": "https://onchess-frontend.vercel.app/icon.png",
-    "homeUrl": "https://onchess-frontend.vercel.app/",
-    "subtitle": "Every move is Based!",
-    "primaryCategory": "games",
+    "homeUrl": "https://onchess-frontend.vercel.app",
+    "imageUrl": "https://onchess-frontend.vercel.app/image.png",
     "splashImageUrl": "https://onchess-frontend.vercel.app/splash.png",
     "splashBackgroundColor": "#FFFFFF",
-    "webhookUrl": "https://onchess-frontend.vercel.app/webhook",
-    "description": "OnChess brings chess to Base. Every move is a transaction, every match is verifiable, and every win is immortalized on-chain. Challenge your frens, sign your moves, and own your games."
+    "webhookUrl": "https://onchess-frontend.vercel.app/api/webhook",
+    "subtitle": "Every move is onchain!",
+    "description": "OnChess brings chess to Base. Every move is a transaction, every match is verifiable, and every win is immortalized on-chain. Challenge your frens, sign your moves, and own your games.",
+    "primaryCategory": "games"
+  },
+  "accountAssociation": {
+    "header": "eyJmaWQiOjUxNTU4NSwidHlwZSI6ImF1dGgiLCJrZXkiOiIweEQ5YjhmRUNhRTZmOGVFOUVCQzNEMDRiQ0RDREQ1N2YyMzkwODM1NEQifQ",
+    "payload": "eyJkb21haW4iOiJvbmNoZXNzLWZyb250ZW5kLnZlcmNlbC5hcHAifQ",
+    "signature": "huMvVVyq3v2l5ydr+tP4GCUVphD7vugdB0gRQEcBz/10OKkLDcNanb9gU/9ycZTZWxKyz6Av6Nz7/6V4UxbTIBw="
   },
   "embed": {
     "width": 100,
