@@ -14,6 +14,8 @@ function GameBoard({ gameId, onBack }) {
   const [showPromotionDialog, setShowPromotionDialog] = useState(false)
   const [optionSquares, setOptionSquares] = useState({})
   const [rightClickedSquares, setRightClickedSquares] = useState({})
+  const [rematchGameId, setRematchGameId] = useState(null)
+  const [rematchRequested, setRematchRequested] = useState(false)
   const publicClient = usePublicClient()
 
   // Read game state from contract
@@ -40,6 +42,10 @@ function GameBoard({ gameId, onBack }) {
   // Write contract for resigning
   const { data: resignHash, writeContract: resignContract, isPending: isResignPending } = useWriteContract()
   const { isLoading: isResignConfirming } = useWaitForTransactionReceipt({ hash: resignHash })
+  
+  // Write contract for rematch
+  const { data: rematchHash, writeContract: rematchContract, isPending: isRematchPending } = useWriteContract()
+  const { isLoading: isRematchConfirming } = useWaitForTransactionReceipt({ hash: rematchHash })
 
   // Watch for move events
   useWatchContractEvent({
@@ -203,6 +209,80 @@ function GameBoard({ gameId, onBack }) {
       args: [BigInt(gameId)]
     })
   }
+  
+  // Rematch functionality
+  const handleRequestRematch = () => {
+    setRematchRequested(true)
+    rematchContract({
+      address: contractAddressData.address,
+      abi: CONTRACT_ABI,
+      functionName: 'createGame',
+      args: []
+    })
+  }
+  
+  const handleAcceptRematch = () => {
+    if (!rematchGameId) return
+    rematchContract({
+      address: contractAddressData.address,
+      abi: CONTRACT_ABI,
+      functionName: 'joinGame',
+      args: [BigInt(rematchGameId)]
+    })
+  }
+  
+  // Watch for rematch game creation
+  useEffect(() => {
+    if (rematchHash && !isRematchConfirming && !isRematchPending && rematchRequested) {
+      (async () => {
+        try {
+          const counter = await publicClient.readContract({
+            address: contractAddressData.address,
+            abi: CONTRACT_ABI,
+            functionName: 'gameCounter'
+          })
+          const newGameId = Number(counter) - 1
+          setRematchGameId(newGameId)
+        } catch (e) {
+          console.error('Failed to get rematch game ID:', e)
+        }
+      })()
+    }
+  }, [rematchHash, isRematchConfirming, isRematchPending, rematchRequested, publicClient])
+  
+  // Poll for opponent accepting rematch
+  useEffect(() => {
+    if (!rematchGameId || !publicClient) return
+    
+    const checkRematch = setInterval(async () => {
+      try {
+        const game = await publicClient.readContract({
+          address: contractAddressData.address,
+          abi: CONTRACT_ABI,
+          functionName: 'getGame',
+          args: [BigInt(rematchGameId)]
+        })
+        
+        const zeroAddress = '0x0000000000000000000000000000000000000000'
+        if (game.black !== zeroAddress) {
+          // Opponent joined rematch!
+          clearInterval(checkRematch)
+          window.location.href = `/?game=${rematchGameId}`
+          onBack()
+          setTimeout(() => {
+            // Navigate to new game (you'll need to add this prop)
+            if (window.location.pathname === '/') {
+              window.location.reload()
+            }
+          }, 500)
+        }
+      } catch (e) {
+        console.error('Error checking rematch:', e)
+      }
+    }, 3000)
+    
+    return () => clearInterval(checkRematch)
+  }, [rematchGameId, publicClient, onBack])
 
   function onSquareRightClick(square) {
     const color = 'rgba(0, 82, 255, 0.4)'
@@ -284,6 +364,32 @@ function GameBoard({ gameId, onBack }) {
                 {gameData.winner && gameData.winner !== '0x0000000000000000000000000000000000000000' && (
                   <p>Winner: {formatAddress(gameData.winner)}</p>
                 )}
+                
+                {/* Rematch Section */}
+                <div className="rematch-section" style={{marginTop: '1rem'}}>
+                  {!rematchGameId && !rematchRequested ? (
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleRequestRematch}
+                      disabled={isRematchPending || isRematchConfirming}
+                    >
+                      {isRematchPending || isRematchConfirming ? 'Creating Rematch...' : '🔁 Request Rematch'}
+                    </button>
+                  ) : rematchGameId && gameData.white?.toLowerCase() === address?.toLowerCase() ? (
+                    <div className="rematch-waiting">
+                      <p>⏳ Waiting for opponent to accept rematch...</p>
+                      <p style={{fontSize: '0.85em', opacity: 0.7}}>Game #{rematchGameId}</p>
+                    </div>
+                  ) : rematchGameId ? (
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleAcceptRematch}
+                      disabled={isRematchPending || isRematchConfirming}
+                    >
+                      {isRematchPending || isRematchConfirming ? 'Accepting...' : '✅ Accept Rematch'}
+                    </button>
+                  ) : null}
+                </div>
               </div>
             )}
 

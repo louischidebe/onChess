@@ -33,8 +33,8 @@ contract OnChess is Ownable, ReentrancyGuard {
     uint256 public devFee;
     uint256 public accumulatedFees;
     
-    // Game timeout: 1 hour for pending games
-    uint256 constant PENDING_GAME_TIMEOUT = 1 hours;
+    // Game timeout: 1 hour for any inactive game
+    uint256 constant GAME_TIMEOUT = 1 hours;
     
     // Starting position FEN
     string constant STARTING_FEN = "startpos";
@@ -82,7 +82,7 @@ contract OnChess is Ownable, ReentrancyGuard {
         require(msg.sender != game.white, "Host cannot join as opponent");
         
         // Check if game has timed out (inactive for over 1 hour without opponent)
-        if (block.timestamp > game.createdAt + PENDING_GAME_TIMEOUT) {
+        if (block.timestamp > game.createdAt + GAME_TIMEOUT) {
             game.active = false;
             emit GameEnded(gameId, address(0), "timeout - no opponent joined", block.timestamp);
             revert("Game has timed out");
@@ -94,19 +94,18 @@ contract OnChess is Ownable, ReentrancyGuard {
         emit GameJoined(gameId, msg.sender);
     }
     /**
-     * @notice Close a pending game that has timed out
+     * @notice Close an inactive game that has timed out
      * @param gameId The game ID
-     * @dev Anyone can call this for games pending over 1 hour without opponent
+     * @dev Anyone can call this for games inactive over 1 hour
      */
-    function closePendingGame(uint256 gameId) external {
+    function closeInactiveGame(uint256 gameId) external {
         Game storage game = games[gameId];
         require(game.active, "Game already ended");
-        require(game.black == address(0), "Game already has opponent");
-        require(block.timestamp > game.createdAt + PENDING_GAME_TIMEOUT, "Game has not timed out yet");
+        require(block.timestamp > game.lastMoveAt + GAME_TIMEOUT, "Game has not timed out yet");
         
         game.active = false;
         
-        emit GameEnded(gameId, address(0), "timeout - closed", block.timestamp);
+        emit GameEnded(gameId, address(0), "timeout - inactive", block.timestamp);
     }
     
     /**

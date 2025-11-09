@@ -70,7 +70,7 @@ function AppContent() {
       
       <footer className="footer">
         <div className="footer-content">
-          <p>Built on Base • Every move is on-chain</p>
+          <p>Built on Base • Every move is onchain</p>
           <div className="footer-links">
             <a href="https://base.org" target="_blank" rel="noopener noreferrer">About Base</a>
             <span>•</span>

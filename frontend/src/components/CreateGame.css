@@ -80,6 +80,28 @@
   margin: 0;
 }
 
+.flex {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.flex.gap-sm {
+  gap: var(--spacing-sm);
+}
+
+.flex input {
+  flex: 1;
+  min-width: 0;
+}
+
+.flex button {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding-left: var(--spacing-md);
+  padding-right: var(--spacing-md);
+}
+
 .player-info {
   display: flex;
   align-items: center;
